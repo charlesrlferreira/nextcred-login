@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-marca: #0b3b60;
+  --color-marca-escuro: #072a45;
+  --color-marca-claro: #e7eff6;
+  --color-destaque: #13a05a;
+  --color-destaque-escuro: #0d7a44;
+  --color-destaque-claro: #e6f6ee;
+  --color-ouro: #f2b705;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primario {
+  @apply btn bg-destaque text-white hover:bg-destaque-escuro;
+}
+@utility btn-marca {
+  @apply btn bg-marca text-white hover:bg-marca-escuro;
+}
+@utility btn-secundario {
+  @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50;
+}
+@utility btn-perigo {
+  @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+}
+@utility campo {
+  @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-marca focus:ring-2 focus:ring-marca/20;
+}
+@utility rotulo {
+  @apply mb-1.5 block text-sm font-medium text-slate-700;
+}
+@utility cartao {
+  @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  body {
+    background: #fff;
+  }
+  .nao-imprimir {
+    display: none !important;
+  }
+}
