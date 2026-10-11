@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { exigirUsuario } from "@/lib/auth/dal";
-import { dataHora, listarCalculos, listarClientes } from "@/lib/dados";
+import { buscarChecklist } from "@/lib/checklists/catalogo";
+import { dataHora, listarCalculos, listarChecklists, listarClientes } from "@/lib/dados";
 import { buscarFerramenta, FERRAMENTAS } from "@/lib/ferramentas/registro";
 
 export const metadata: Metadata = { title: "Painel" };
 
 export default async function Painel() {
   const { escritorio } = await exigirUsuario();
-  const [recentes, clientes] = await Promise.all([listarCalculos(escritorio.id, 6), listarClientes(escritorio.id)]);
+  const [recentes, clientes, checklists] = await Promise.all([
+    listarCalculos(escritorio.id, 6),
+    listarClientes(escritorio.id),
+    listarChecklists(escritorio.id, 20),
+  ]);
+  const pendentes = checklists.filter((c) => c.concluidos.length < (buscarChecklist(c.modelo)?.passos.length ?? 0)).slice(0, 5);
   const semConfigurar = escritorio.nome === "Meu escritório" || !escritorio.logo;
 
   return (
@@ -26,6 +32,12 @@ export default async function Painel() {
           <Link href="/app/escritorio" className="btn-marca shrink-0">Configurar escritório</Link>
         </div>
       )}
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Link href="/app/ferramentas" className="btn-marca py-3">Fazer um cálculo</Link>
+        <Link href="/app/checklists" className="btn-secundario py-3">Abrir um checklist</Link>
+        <Link href="/app/modelos" className="btn-secundario py-3">Gerar um documento</Link>
+      </div>
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Ferramentas</h2>
@@ -66,12 +78,39 @@ export default async function Painel() {
             </ul>
           )}
         </section>
+        <div className="space-y-6">
+        <section className="cartao p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">Checklists em andamento</h2>
+            <Link href="/app/checklists" className="text-sm font-medium text-marca hover:underline">Ver</Link>
+          </div>
+          {pendentes.length === 0 ? (
+            <p className="text-sm text-slate-500">Nenhum checklist pendente.</p>
+          ) : (
+            <ul className="space-y-3">
+              {pendentes.map((c) => {
+                const total = buscarChecklist(c.modelo)?.passos.length ?? 1;
+                return (
+                  <li key={c.id}>
+                    <Link href={`/app/checklists/${c.id}`} className="block hover:text-marca">
+                      <span className="block text-sm font-medium">{c.titulo}</span>
+                      <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <span className="block h-full rounded-full bg-marca" style={{ width: `${(c.concluidos.length / total) * 100}%` }} />
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
         <section className="cartao p-5">
           <h2 className="font-semibold text-slate-900">Clientes</h2>
           <p className="mt-1 text-3xl font-bold text-marca">{clientes.length}</p>
           <p className="text-sm text-slate-600">cadastrados para vincular aos cálculos.</p>
           <Link href="/app/clientes" className="btn-secundario mt-4 w-full">Gerenciar clientes</Link>
         </section>
+        </div>
       </div>
     </div>
   );

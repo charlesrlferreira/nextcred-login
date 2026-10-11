@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { CHECKLISTS } from "@/lib/checklists/catalogo";
 import { AREAS, FERRAMENTAS } from "@/lib/ferramentas/registro";
+import { MODELOS } from "@/lib/modelos/catalogo";
 
 const PASSOS = [
   { titulo: "Escolha a ferramenta", texto: "Rescisão, férias, DAS, Fator R, comparativo de regimes, honorários e mais." },
@@ -18,9 +20,8 @@ const RECURSOS = [
 ];
 
 const EM_BREVE = [
-  "Checklists de rotinas por departamento",
-  "Modelos de contratos, propostas e declarações",
   "Guias de consulta com a base legal",
+  "Mais checklists e modelos a cada mês",
   "Módulo condominial: rateio, previsão orçamentária e prestação de contas",
   "Módulo de terceirização: custo de posto e repactuação",
   "Assistente com IA para comunicados e pareceres",
@@ -157,6 +158,32 @@ export default function Inicio() {
                   </ul>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-20">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="cartao p-6">
+              <p className="text-4xl font-bold text-marca">{CHECKLISTS.length}</p>
+              <h3 className="mt-1 text-xl font-semibold">Checklists passo a passo</h3>
+              <p className="mt-2 text-slate-600">
+                Rotinas de societário, fiscal, DP, contábil, IR, condomínios e terceirização, com prazo, documentos e base legal em cada passo.
+                Crie uma cópia por cliente e acompanhe o andamento.
+              </p>
+              <ul className="mt-4 space-y-1 text-sm text-slate-700">
+                {CHECKLISTS.slice(0, 6).map((c) => <li key={c.slug}>✓ {c.titulo}</li>)}
+              </ul>
+            </div>
+            <div className="cartao p-6">
+              <p className="text-4xl font-bold text-marca">{MODELOS.length}</p>
+              <h3 className="mt-1 text-xl font-semibold">Modelos de documentos</h3>
+              <p className="mt-2 text-slate-600">
+                Preencha os campos, veja a prévia ao vivo e gere o documento com o timbre do seu escritório, em PDF ou no Word.
+              </p>
+              <ul className="mt-4 space-y-1 text-sm text-slate-700">
+                {MODELOS.slice(0, 6).map((m) => <li key={m.slug}>✓ {m.nome}</li>)}
+              </ul>
             </div>
           </div>
         </section>

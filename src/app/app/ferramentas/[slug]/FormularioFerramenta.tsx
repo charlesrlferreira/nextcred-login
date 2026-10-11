@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { BotaoCopiarWord } from "@/components/BotaoCopiarWord";
 import { ResultadoView } from "@/components/ResultadoView";
+import { CampoFormulario, valorPadrao } from "@/components/CampoFormulario";
 import { campoVisivel } from "@/lib/ferramentas/entrada";
 import type { Campo } from "@/lib/ferramentas/registro";
 import type { EstadoCalculo } from "./acoes";
@@ -15,12 +16,6 @@ type Props = {
   clientes: { id: string; nome: string }[];
   clienteInicial: string;
 };
-
-function valorPadrao(c: Campo): string {
-  if (c.padrao === undefined) return "";
-  if (c.tipo === "sim_nao") return c.padrao ? "true" : "";
-  return String(c.padrao).replace(".", ",");
-}
 
 export function FormularioFerramenta({ acao, campos, iniciais, clientes, clienteInicial }: Props) {
   const [estado, enviar, calculando] = useActionState(acao, {});
@@ -35,13 +30,25 @@ export function FormularioFerramenta({ acao, campos, iniciais, clientes, cliente
     if (estado.resultado) resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [estado.resultado]);
 
-  const alterar = (nome: string, valor: string) => setValores((v) => ({ ...v, [nome]: valor }));
+  // Esconde o erro de um campo assim que ele é editado; zera a cada nova resposta do servidor.
+  const [editados, setEditados] = useState<Set<string>>(new Set());
+  const [estadoVisto, setEstadoVisto] = useState(estado);
+  if (estado !== estadoVisto) {
+    setEstadoVisto(estado);
+    setEditados(new Set());
+  }
+  const erroDe = (nome: string) => (editados.has(nome) ? undefined : estado.erros?.[nome]);
+
+  const alterar = (nome: string, valor: string) => {
+    setValores((v) => ({ ...v, [nome]: valor }));
+    setEditados((e) => (e.has(nome) ? e : new Set(e).add(nome)));
+  };
 
   return (
     <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
       <form action={enviar} className="cartao h-fit space-y-4 p-5 xl:sticky xl:top-32" noValidate>
         {campos.filter((c) => campoVisivel(c, valores)).map((c) => (
-          <CampoFormulario key={c.nome} campo={c} valor={valores[c.nome] ?? ""} erro={estado.erros?.[c.nome]} onChange={alterar} />
+          <CampoFormulario key={c.nome} campo={c} valor={valores[c.nome] ?? ""} erro={erroDe(c.nome)} onChange={alterar} />
         ))}
 
         <div className="space-y-4 border-t border-slate-100 pt-4">
@@ -90,84 +97,6 @@ export function FormularioFerramenta({ acao, campos, iniciais, clientes, cliente
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function CampoFormulario({
-  campo: c,
-  valor,
-  erro,
-  onChange,
-}: {
-  campo: Campo;
-  valor: string;
-  erro?: string;
-  onChange: (nome: string, valor: string) => void;
-}) {
-  const id = `campo-${c.nome}`;
-  const classe = `campo ${erro ? "border-red-400 focus:border-red-500 focus:ring-red-200" : ""}`;
-  const ajuda = erro ? (
-    <p className="mt-1 text-xs text-red-600">{erro}</p>
-  ) : c.ajuda ? (
-    <p className="mt-1 text-xs text-slate-500">{c.ajuda}</p>
-  ) : null;
-
-  if (c.tipo === "sim_nao") {
-    return (
-      <div>
-        <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-700">
-          <input
-            type="checkbox"
-            name={c.nome}
-            value="true"
-            checked={valor === "true"}
-            onChange={(e) => onChange(c.nome, e.target.checked ? "true" : "")}
-            className="h-4 w-4 rounded border-slate-300 accent-destaque"
-          />
-          {c.rotulo}
-        </label>
-        {ajuda}
-      </div>
-    );
-  }
-
-  let controle: React.ReactNode;
-  if (c.tipo === "selecao") {
-    controle = (
-      <select id={id} name={c.nome} value={valor} onChange={(e) => onChange(c.nome, e.target.value)} className={classe}>
-        {c.opcoes?.map((o) => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
-      </select>
-    );
-  } else if (c.tipo === "data") {
-    controle = <input id={id} name={c.nome} type="date" value={valor} onChange={(e) => onChange(c.nome, e.target.value)} className={classe} />;
-  } else {
-    const prefixo = c.tipo === "moeda" ? "R$" : null;
-    const sufixo = c.tipo === "percentual" ? "%" : null;
-    controle = (
-      <div className="relative">
-        {prefixo && <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-500">{prefixo}</span>}
-        <input
-          id={id}
-          name={c.nome}
-          type="text"
-          inputMode={c.tipo === "inteiro" ? "numeric" : "decimal"}
-          value={valor}
-          onChange={(e) => onChange(c.nome, e.target.value)}
-          className={`${classe} ${prefixo ? "pl-10" : ""} ${sufixo ? "pr-8" : ""} tabular-nums`}
-          placeholder={c.tipo === "moeda" ? "0,00" : "0"}
-          aria-invalid={Boolean(erro)}
-        />
-        {sufixo && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-500">{sufixo}</span>}
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <label htmlFor={id} className="rotulo">{c.rotulo}</label>
-      {controle}
-      {ajuda}
     </div>
   );
 }

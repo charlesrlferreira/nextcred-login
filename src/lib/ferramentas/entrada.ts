@@ -1,4 +1,4 @@
-import type { Campo, Ferramenta } from "./registro";
+import type { Campo } from "../campos";
 
 /** Converte "1.234,56", "R$ 1234,56" ou "1234.56" em número. */
 export function parseNumeroBr(texto: string): number | null {
@@ -20,7 +20,7 @@ export type ResultadoValidacao =
   | { ok: false; erros: Record<string, string> };
 
 /** Valida e converte os dados do formulário de acordo com os campos declarados. */
-export function validarEntrada(ferramenta: Ferramenta, bruto: Record<string, string>): ResultadoValidacao {
+export function validarEntrada(ferramenta: { campos: Campo[] }, bruto: Record<string, string>): ResultadoValidacao {
   const valores: Record<string, unknown> = {};
   const erros: Record<string, string> = {};
 
@@ -48,6 +48,13 @@ export function validarEntrada(ferramenta: Ferramenta, bruto: Record<string, str
     if (!texto) {
       if (c.padrao !== undefined) valores[c.nome] = c.padrao;
       else if (!c.opcional) erros[c.nome] = "Campo obrigatório.";
+      continue;
+    }
+
+    if (c.tipo === "texto" || c.tipo === "texto_longo") {
+      const limite = c.max ?? (c.tipo === "texto" ? 300 : 5000);
+      if (texto.length > limite) erros[c.nome] = `Use no máximo ${limite} caracteres.`;
+      else valores[c.nome] = texto;
       continue;
     }
 

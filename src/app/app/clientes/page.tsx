@@ -29,9 +29,11 @@ export default async function Clientes() {
                   <p className="text-xs text-slate-500">{[c.documento, c.regime, c.email].filter(Boolean).join(" · ") || "Sem dados adicionais"}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Link href={`/app/ferramentas?cliente=${c.id}`} className="hidden text-sm font-medium text-marca hover:underline sm:inline">
-                    Novo cálculo
-                  </Link>
+                  <span className="hidden gap-3 text-sm font-medium text-marca sm:flex">
+                    <Link href={`/app/ferramentas?cliente=${c.id}`} className="hover:underline">Cálculo</Link>
+                    <Link href={`/app/checklists?cliente=${c.id}`} className="hover:underline">Checklist</Link>
+                    <Link href={`/app/modelos?cliente=${c.id}`} className="hover:underline">Documento</Link>
+                  </span>
                   <form action={excluirCliente.bind(null, c.id)}>
                     <button className="btn-perigo px-3 py-1.5 text-xs">Excluir</button>
                   </form>

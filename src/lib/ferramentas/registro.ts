@@ -6,22 +6,9 @@ import { calcularRescisao, TIPOS_RESCISAO } from "../calc/rescisao";
 import { calcularDas, calcularFatorR } from "../calc/simples";
 import { SIMPLES } from "../calc/tabelas";
 import type { Resultado } from "../calc/tipos";
+import type { Campo } from "../campos";
 
-export type TipoCampo = "moeda" | "numero" | "inteiro" | "percentual" | "data" | "selecao" | "sim_nao";
-
-export type Campo = {
-  nome: string;
-  rotulo: string;
-  tipo: TipoCampo;
-  ajuda?: string;
-  padrao?: string | number | boolean;
-  opcional?: boolean;
-  min?: number;
-  max?: number;
-  opcoes?: { valor: string; rotulo: string }[];
-  /** Exibe o campo só quando outro campo tem um destes valores. */
-  mostrarSe?: { campo: string; valores: string[] };
-};
+export type { Campo, TipoCampo } from "../campos";
 
 export type Area = "Departamento Pessoal" | "Tributário" | "Débitos e Multas" | "Escritório Contábil";
 

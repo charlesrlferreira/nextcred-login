@@ -5,12 +5,14 @@ base legal citada, histórico por cliente e PDF A4 com o logo do escritório.
 
 ## O que já está pronto
 
-| Área | Ferramentas |
+| Módulo | Conteúdo |
 |---|---|
 | Departamento Pessoal | Rescisão (7 tipos), Férias, 13º salário, INSS e IRRF |
 | Tributário | DAS do Simples Nacional, Fator R, Comparador de regimes, Pró-labore x lucros |
 | Débitos e Multas | Multas e juros de tributos federais em atraso |
 | Escritório Contábil | Precificação de honorários |
+| Checklists (15) | Societário, fiscal, DP, contábil, IRPF, condomínios e terceirização — cópia por cliente, andamento, observações e PDF |
+| Modelos (9) | Contrato e distrato de serviços contábeis, proposta, reajuste, notificação de débito, comunicado, procuração, protocolo e edital de assembleia de condomínio |
 
 Base da plataforma:
 
@@ -34,7 +36,10 @@ Base da plataforma:
 ```
 src/lib/calc/          Cálculos puros (sem banco), um arquivo por tema
 src/lib/calc/tabelas.ts  ← TODAS as alíquotas, faixas e tetos. Revisar a cada ano.
-src/lib/ferramentas/   Catálogo: campos de cada formulário, validação e exibição
+src/lib/ferramentas/   Catálogo de ferramentas: campos, validação e exibição
+src/lib/checklists/    Catálogo de checklists (passos, prazos, documentos, base legal)
+src/lib/modelos/       Modelos de documentos: campos e geração do texto
+src/lib/campos.ts      Tipos de campo compartilhados pelos formulários
 src/lib/db/            Esquema do banco e conexão
 src/lib/auth/          Sessão, envio do código e acesso ao usuário logado
 src/app/               Páginas: início, /entrar, /app/*, /imprimir/[id]
@@ -48,6 +53,14 @@ tests/                 Testes dos cálculos com valores conferidos
 3. Adicione testes em `tests/`.
 
 O formulário, a validação, o histórico e o PDF passam a funcionar automaticamente.
+
+### Como adicionar um checklist ou modelo
+
+- **Checklist:** acrescente um item em `src/lib/checklists/catalogo.ts`. Ao editar um checklist existente,
+  acrescente passos **ao final**: o andamento salvo usa a posição de cada passo.
+- **Modelo:** acrescente um item em `src/lib/modelos/catalogo.ts` com os campos e a função `gerar`,
+  que devolve o documento em blocos (parágrafos, cláusulas numeradas, listas e assinaturas).
+  A prévia ao vivo, o PDF com timbre e a cópia para o Word funcionam automaticamente.
 
 ## Rodando localmente
 
@@ -78,4 +91,5 @@ Os três serviços têm plano gratuito suficiente para começar.
 - As tabelas de 2026 (salário mínimo, INSS, IRRF com o redutor da Lei 15.270/2025, Simples Nacional e a presunção
   da LC 224/2025) estão em `src/lib/calc/tabelas.ts` e **devem ser conferidas por um profissional** antes do uso com clientes.
 - O comparador de regimes é uma estimativa anual simplificada (sem ICMS-ST, monofásicos, benefícios fiscais ou prejuízos acumulados).
+- Os modelos de documentos e os prazos dos checklists são pontos de partida: revise-os com a sua prática e a convenção/contrato de cada cliente.
 - Na multa e juros, a Selic acumulada é informada pelo usuário a partir da tabela da Receita Federal.

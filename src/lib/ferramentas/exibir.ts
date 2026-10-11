@@ -1,7 +1,7 @@
 import type { Formato } from "../calc/tipos";
 import { brl, fmtData, num, pct } from "../calc/util";
 import { campoVisivel } from "./entrada";
-import type { Ferramenta } from "./registro";
+import type { Campo } from "../campos";
 
 export function formatarValor(valor: number | string, formato: Formato): string {
   if (typeof valor === "string") return formato === "data" ? fmtData(valor) : valor;
@@ -16,7 +16,7 @@ export function formatarValor(valor: number | string, formato: Formato): string 
 }
 
 /** Lista "rótulo: valor" dos dados informados, para o PDF e o histórico. */
-export function resumoEntrada(ferramenta: Ferramenta, entrada: Record<string, unknown>): [string, string][] {
+export function resumoEntrada(ferramenta: { campos: Campo[] }, entrada: Record<string, unknown>): [string, string][] {
   return ferramenta.campos
     .filter((c) => campoVisivel(c, entrada) && entrada[c.nome] !== undefined && entrada[c.nome] !== null)
     .map((c) => {
@@ -24,6 +24,7 @@ export function resumoEntrada(ferramenta: Ferramenta, entrada: Record<string, un
       let texto: string;
       if (c.tipo === "selecao") texto = c.opcoes?.find((o) => o.valor === v)?.rotulo ?? String(v);
       else if (c.tipo === "sim_nao") texto = v ? "Sim" : "Não";
+      else if (c.tipo === "texto" || c.tipo === "texto_longo") texto = String(v);
       else if (c.tipo === "data") texto = fmtData(String(v));
       else if (c.tipo === "moeda") texto = brl(Number(v));
       else if (c.tipo === "percentual") texto = pct(Number(v));
@@ -33,7 +34,7 @@ export function resumoEntrada(ferramenta: Ferramenta, entrada: Record<string, un
 }
 
 /** Valores para preencher o formulário ao duplicar um cálculo. */
-export function valoresParaFormulario(ferramenta: Ferramenta, entrada: Record<string, unknown>): Record<string, string> {
+export function valoresParaFormulario(ferramenta: { campos: Campo[] }, entrada: Record<string, unknown>): Record<string, string> {
   const saida: Record<string, string> = {};
   for (const c of ferramenta.campos) {
     const v = entrada[c.nome];

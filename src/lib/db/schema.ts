@@ -74,6 +74,47 @@ export const calculos = pgTable(
   (t) => [index("calculos_escritorio_idx").on(t.escritorioId, t.criadoEm)],
 );
 
+export const checklists = pgTable(
+  "checklists",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    escritorioId: uuid("escritorio_id")
+      .notNull()
+      .references(() => escritorios.id, { onDelete: "cascade" }),
+    usuarioId: uuid("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    clienteId: uuid("cliente_id").references(() => clientes.id, { onDelete: "set null" }),
+    modelo: text("modelo").notNull(),
+    titulo: text("titulo").notNull(),
+    /** Índices dos passos concluídos. */
+    concluidos: jsonb("concluidos").$type<number[]>().notNull().default([]),
+    observacoes: text("observacoes"),
+    criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
+    atualizadoEm: timestamp("atualizado_em", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("checklists_escritorio_idx").on(t.escritorioId, t.atualizadoEm)],
+);
+
+export const documentos = pgTable(
+  "documentos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    escritorioId: uuid("escritorio_id")
+      .notNull()
+      .references(() => escritorios.id, { onDelete: "cascade" }),
+    usuarioId: uuid("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    clienteId: uuid("cliente_id").references(() => clientes.id, { onDelete: "set null" }),
+    modelo: text("modelo").notNull(),
+    titulo: text("titulo").notNull(),
+    campos: jsonb("campos").notNull(),
+    criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("documentos_escritorio_idx").on(t.escritorioId, t.criadoEm)],
+);
+
 export type Escritorio = typeof escritorios.$inferSelect;
 export type Cliente = typeof clientes.$inferSelect;
 export type Calculo = typeof calculos.$inferSelect;
